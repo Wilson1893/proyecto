@@ -1,0 +1,1213 @@
+#include <SoftwareSerial.h> 
+#define terminator 10 // DEC value for a LF(line feed) to skip while loop
+
+ int Color[]={53,52,51,//(53 semaforo 1 seguir verde posicion #0),(52 semaforo 1 seguir Amarillo posicion #1),(51 semaforo 1 seguir Rojo posicion #2)
+                        50,49,48, //(48 semaforo 1  Doblar Rojo posicion #5),(49 semaforo 1 Doblar Amarillo posicion #4),(50 semaforo 1 Doblar Verde posicion #3)
+                                 47,46,45,//(45 semaforo 2  Seguir Rojo posicion #9)
+                                            44,43,42, //(42 semaforo 2  Seguir Rojo posicion #12)
+                                                     41,40,39,//(39 semaforo 3  Seguir Rojo posicion #15)
+                                                              38,37,36, //(36 semaforo 3  Seguir Rojo posicion #18)
+                                                                       35,34,33,//(33 semaforo 4  Seguir Rojo posicion #21)
+                                                                                32,31,30};//(30 semaforo 4  Seguir Rojo posicion #24)
+                                                                                
+int asi=22;
+int n=0;
+unsigned long timer;
+String IncDataSerial = "";
+char mens;
+int esto= 23;
+
+  // Constantes
+const int RETARDO_VERDE = 4000;
+const int RETARDO_PARPADEO_VERDE = 500;
+const int RETARDO_AMARILLO = 2000;
+
+// Conexiones
+int verde_semaforo1 = 0;
+int amarillo_semaforo1 = 1;
+int rojo_semaforo1 = 2;
+int verde_semaforo2 = 6;
+int amarillo_semaforo2 = 7;
+int rojo_semaforo2 = 8;
+int verde_semaforo3 = 12;
+int amarillo_semaforo3 = 13;
+int rojo_semaforo3 = 14;
+int verde_semaforo4 = 18;
+int amarillo_semaforo4 = 19;
+int rojo_semaforo4 = 20;
+
+void setup()
+{
+  delay(1000);
+  Serial.begin(19200);
+  Serial1.begin(19200);
+
+  // Automatically power up the SIM900.
+  pinMode(9, OUTPUT);
+  digitalWrite(9,LOW);
+  delay(1000);
+  digitalWrite(9,HIGH);
+  delay(2500);
+  digitalWrite(9,LOW);
+  delay(3500);
+  // End of SIM900 power up. 
+pinMode(asi,INPUT);
+
+  pinMode(asi,INPUT);
+
+ for (n=0;n<25;n++) {
+pinMode (Color[n],OUTPUT);
+}
+
+
+//Semaforo#1 seguir
+digitalWrite (Color[0],LOW);//Semaforo#1 Seguir Verde      Encendido
+digitalWrite (Color[1],LOW);//Semaforo#1 Seguir Amarillo   Encendido
+digitalWrite (Color[2],LOW);//Semaforo#1 Seguir Rojo       Encendido
+
+//Semaforo#1 Doblar
+digitalWrite (Color[3],LOW);//Semaforo#1 Doblar   Verde     Encendido
+digitalWrite (Color[4],LOW);//Semaforo#1 Doblar   Amarillo  Encendido
+digitalWrite (Color[5],LOW);//Semaforo#1 Doblar   Rojo      Encendido
+
+//Semaforo#2 Seguir
+digitalWrite (Color[6],LOW);//Semaforo#2 Seguir   Verde     Encendido
+digitalWrite (Color[7],LOW);//Semaforo#2 Seguir   Amarillo  Encendido
+digitalWrite (Color[8],LOW);//Semaforo#2 Seguir   Rojo      Encendido
+
+//Semaforo#2 Doblar
+digitalWrite (Color[9],LOW);//Semaforo#2 Doblar   Verde     Encendido
+digitalWrite (Color[10],LOW);//Semaforo#2 Doblar   Amarillo  Encendido
+digitalWrite (Color[11],LOW);//Semaforo#2 Doblar   Rojo      Encendido
+
+//Semaforo#3 Seguir
+digitalWrite (Color[12],LOW);//Semaforo#3 Seguir  Verde     Encendido
+digitalWrite (Color[13],LOW);//Semaforo#3 Seguir  Amarillo  Encendido
+digitalWrite (Color[14],LOW);//Semaforo#3 Seguir  Rojo      Encendido
+
+//Semaforo#3 Doblar
+digitalWrite (Color[15],LOW);//Semaforo#3 Doblar  Verde     Encendido
+digitalWrite (Color[16],LOW);//Semaforo#3 Doblar  Amarillo  Encendido
+digitalWrite (Color[17],LOW);//Semaforo#3 Doblar  Rojo      Encendido
+
+//Semaforo#4 Seguir
+digitalWrite (Color[18],LOW);//Semaforo#4 Seguir  Verde     Encendido
+digitalWrite (Color[19],LOW);//Semaforo#4 Seguir  Amarillo  Encendido
+digitalWrite (Color[20],LOW);//Semaforo#4 Seguir  Rojo      Encendido
+
+//Semaforo#4 Doblar
+digitalWrite (Color[21],LOW);//Semaforo#4 Doblar  Verde     Encendido
+digitalWrite (Color[22],LOW);//Semaforo#4 Doblar  Amarillo  Encendido
+digitalWrite (Color[23],LOW);//Semaforo#4 Doblar  Rojo      Encendido
+}
+
+ 
+void loop()
+{
+ 
+  if (Serial1.available()>0)  // if date is comming from softwareserial port ==> data is comming from gprs shield
+  {
+    boolean getLF = false;
+    while(Serial1.available()>0 && !getLF)  // reading data into string if activity is on port and getLF is false ==> no LF have been send
+    {
+      char buffer=Serial1.read();  // writing data into char
+      IncDataSerial += buffer;
+      if (buffer == terminator) {
+        getLF = true;
+      }
+    }
+ 
+    Serial.print(IncDataSerial);  // send string ( char array ) to hardware serial
+   //IncDataSerial = "";
+    mens=Serial1.read();
+
+
+    if ('A' == mens)
+    {
+
+      //Semaforo#1 seguir
+digitalWrite (Color[0],HIGH);//Semaforo#1 Seguir Verde      Encendido
+digitalWrite (Color[2],LOW);//Semaforo#1 Seguir Rojo       Encendido
+//Semaforo#1 Doblar
+digitalWrite (Color[3],LOW);//Semaforo#1 Doblar   Verde     Encendido
+digitalWrite (Color[5],HIGH);//Semaforo#1 Doblar   Rojo      Encendido
+//Semaforo#2 Seguir
+digitalWrite (Color[6],LOW);//Semaforo#2 Seguir   Verde     Encendido
+digitalWrite (Color[8],HIGH);//Semaforo#2 Seguir   Rojo      Encendido
+//Semaforo#2 Doblar
+digitalWrite (Color[9],LOW);//Semaforo#2 Doblar   Verde     Encendido
+digitalWrite (Color[11],HIGH);//Semaforo#2 Doblar   Rojo      Encendido
+//Semaforo#3 Seguir
+digitalWrite (Color[12],LOW);//Semaforo#3 Seguir  Verde     Encendido
+digitalWrite (Color[14],HIGH);//Semaforo#3 Seguir  Rojo      Encendido
+//Semaforo#3 Doblar
+digitalWrite (Color[15],LOW);//Semaforo#3 Doblar  Verde     Encendido
+digitalWrite (Color[17],HIGH);//Semaforo#3 Doblar  Rojo      Encendido
+//Semaforo#4 Seguir
+digitalWrite (Color[18],LOW);//Semaforo#4 Seguir  Verde     Encendido
+digitalWrite (Color[20],HIGH);//Semaforo#4 Seguir  Rojo      Encendido
+//Semaforo#4 Doblar
+digitalWrite (Color[21],LOW);//Semaforo#4 Doblar  Verde     Encendido
+digitalWrite (Color[23],HIGH);//Semaforo#4 Doblar  Rojo      Encendido
+   
+    }
+
+    if ('B' == mens)
+    {
+
+//B
+  
+//Semaforo#1 seguir
+digitalWrite (Color[0],LOW);//Semaforo#1 Seguir Verde      Encendido
+digitalWrite (Color[2],HIGH);//Semaforo#1 Seguir Rojo       Encendido
+//Semaforo#1 Doblar
+digitalWrite (Color[3],HIGH);//Semaforo#1 Doblar   Verde     Encendido
+digitalWrite (Color[5],LOW);//Semaforo#1 Doblar   Rojo      Encendido
+//Semaforo#2 Seguir
+digitalWrite (Color[6],LOW);//Semaforo#2 Seguir   Verde     Encendido
+digitalWrite (Color[8],HIGH);//Semaforo#2 Seguir   Rojo      Encendido
+//Semaforo#2 Doblar
+digitalWrite (Color[9],LOW);//Semaforo#2 Doblar   Verde     Encendido
+digitalWrite (Color[11],HIGH);//Semaforo#2 Doblar   Rojo      Encendido
+//Semaforo#3 Seguir
+digitalWrite (Color[12],LOW);//Semaforo#3 Seguir  Verde     Encendido
+digitalWrite (Color[14],HIGH);//Semaforo#3 Seguir  Rojo      Encendido
+//Semaforo#3 Doblar
+digitalWrite (Color[15],LOW);//Semaforo#3 Doblar  Verde     Encendido
+digitalWrite (Color[17],HIGH);//Semaforo#3 Doblar  Rojo      Encendido
+//Semaforo#4 Seguir
+digitalWrite (Color[18],LOW);//Semaforo#4 Seguir  Verde     Encendido
+digitalWrite (Color[20],HIGH);//Semaforo#4 Seguir  Rojo      Encendido
+//Semaforo#4 Doblar
+digitalWrite (Color[21],LOW);//Semaforo#4 Doblar  Verde     Encendido
+digitalWrite (Color[23],HIGH);//Semaforo#4 Doblar  Rojo      Encendido
+
+   
+  }
+
+  if ('C' == mens)
+    {
+
+      //Semaforo#1 seguir
+digitalWrite (Color[0],HIGH);//Semaforo#1 Seguir Verde      Encendido
+digitalWrite (Color[2],LOW);//Semaforo#1 Seguir Rojo       Encendido
+//Semaforo#1 Doblar
+digitalWrite (Color[3],HIGH);//Semaforo#1 Doblar   Verde     Encendido
+digitalWrite (Color[5],LOW);//Semaforo#1 Doblar   Rojo      Encendido
+//Semaforo#2 Seguir
+digitalWrite (Color[6],LOW);//Semaforo#2 Seguir   Verde     Encendido
+digitalWrite (Color[8],HIGH);//Semaforo#2 Seguir   Rojo      Encendido
+//Semaforo#2 Doblar
+digitalWrite (Color[9],LOW);//Semaforo#2 Doblar   Verde     Encendido
+digitalWrite (Color[11],HIGH);//Semaforo#2 Doblar   Rojo      Encendido
+//Semaforo#3 Seguir
+digitalWrite (Color[12],LOW);//Semaforo#3 Seguir  Verde     Encendido
+digitalWrite (Color[14],HIGH);//Semaforo#3 Seguir  Rojo      Encendido
+//Semaforo#3 Doblar
+digitalWrite (Color[15],LOW);//Semaforo#3 Doblar  Verde     Encendido
+digitalWrite (Color[17],HIGH);//Semaforo#3 Doblar  Rojo      Encendido
+//Semaforo#4 Seguir
+digitalWrite (Color[18],LOW);//Semaforo#4 Seguir  Verde     Encendido
+digitalWrite (Color[20],HIGH);//Semaforo#4 Seguir  Rojo      Encendido
+//Semaforo#4 Doblar
+digitalWrite (Color[21],LOW);//Semaforo#4 Doblar  Verde     Encendido
+digitalWrite (Color[23],HIGH);//Semaforo#4 Doblar  Rojo      Encendido
+    }
+
+  if ('D' == mens){
+  
+  //Semaforo#1 seguir
+digitalWrite (Color[0],LOW);//Semaforo#1 Seguir Verde      Encendido
+digitalWrite (Color[2],HIGH);//Semaforo#1 Seguir Rojo       Encendido
+//Semaforo#1 Doblar
+digitalWrite (Color[3],LOW);//Semaforo#1 Doblar   Verde     Encendido
+digitalWrite (Color[5],HIGH);//Semaforo#1 Doblar   Rojo      Encendido
+//Semaforo#2 Seguir
+digitalWrite (Color[6],HIGH);//Semaforo#2 Seguir   Verde     Encendido
+digitalWrite (Color[8],LOW);//Semaforo#2 Seguir   Rojo      Encendido
+//Semaforo#2 Doblar
+digitalWrite (Color[9],LOW);//Semaforo#2 Doblar   Verde     Encendido
+digitalWrite (Color[11],HIGH);//Semaforo#2 Doblar   Rojo      Encendido
+//Semaforo#3 Seguir
+digitalWrite (Color[12],LOW);//Semaforo#3 Seguir  Verde     Encendido
+digitalWrite (Color[14],HIGH);//Semaforo#3 Seguir  Rojo      Encendido
+//Semaforo#3 Doblar
+digitalWrite (Color[15],LOW);//Semaforo#3 Doblar  Verde     Encendido
+digitalWrite (Color[17],HIGH);//Semaforo#3 Doblar  Rojo      Encendido
+//Semaforo#4 Seguir
+digitalWrite (Color[18],LOW);//Semaforo#4 Seguir  Verde     Encendido
+digitalWrite (Color[20],HIGH);//Semaforo#4 Seguir  Rojo      Encendido
+//Semaforo#4 Doblar
+digitalWrite (Color[21],LOW);//Semaforo#4 Doblar  Verde     Encendido
+digitalWrite (Color[23],HIGH);//Semaforo#4 Doblar  Rojo      Encendido
+  
+ 
+  }
+
+
+ if ('E' == mens){
+//Semaforo#1 seguir
+digitalWrite (Color[0],LOW);//Semaforo#1 Seguir Verde      Encendido
+digitalWrite (Color[2],HIGH);//Semaforo#1 Seguir Rojo       Encendido
+//Semaforo#1 Doblar
+digitalWrite (Color[3],LOW);//Semaforo#1 Doblar   Verde     Encendido
+digitalWrite (Color[5],HIGH);//Semaforo#1 Doblar   Rojo      Encendido
+//Semaforo#2 Seguir
+digitalWrite (Color[6],LOW);//Semaforo#2 Seguir   Verde     Encendido
+digitalWrite (Color[8],HIGH);//Semaforo#2 Seguir   Rojo      Encendido
+//Semaforo#2 Doblar
+digitalWrite (Color[9],HIGH);//Semaforo#2 Doblar   Verde     Encendido
+digitalWrite (Color[11],LOW);//Semaforo#2 Doblar   Rojo      Encendido
+//Semaforo#3 Seguir
+digitalWrite (Color[12],LOW);//Semaforo#3 Seguir  Verde     Encendido
+digitalWrite (Color[14],HIGH);//Semaforo#3 Seguir  Rojo      Encendido
+//Semaforo#3 Doblar
+digitalWrite (Color[15],LOW);//Semaforo#3 Doblar  Verde     Encendido
+digitalWrite (Color[17],HIGH);//Semaforo#3 Doblar  Rojo      Encendido
+//Semaforo#4 Seguir
+digitalWrite (Color[18],LOW);//Semaforo#4 Seguir  Verde     Encendido
+digitalWrite (Color[20],HIGH);//Semaforo#4 Seguir  Rojo      Encendido
+//Semaforo#4 Doblar
+digitalWrite (Color[21],LOW);//Semaforo#4 Doblar  Verde     Encendido
+digitalWrite (Color[23],HIGH);//Semaforo#4 Doblar  Rojo      Encendido
+ }
+
+  if ('F' == mens){
+
+    //Semaforo#1 seguir
+digitalWrite (Color[0],LOW);//Semaforo#1 Seguir Verde      Encendido
+digitalWrite (Color[2],HIGH);//Semaforo#1 Seguir Rojo       Encendido
+//Semaforo#1 Doblar
+digitalWrite (Color[3],LOW);//Semaforo#1 Doblar   Verde     Encendido
+digitalWrite (Color[5],HIGH);//Semaforo#1 Doblar   Rojo      Encendido
+//Semaforo#2 Seguir
+digitalWrite (Color[6],HIGH);//Semaforo#2 Seguir   Verde     Encendido
+digitalWrite (Color[8],LOW);//Semaforo#2 Seguir   Rojo      Encendido
+//Semaforo#2 Doblar
+digitalWrite (Color[9],HIGH);//Semaforo#2 Doblar   Verde     Encendido
+digitalWrite (Color[11],LOW);//Semaforo#2 Doblar   Rojo      Encendido
+//Semaforo#3 Seguir
+digitalWrite (Color[12],LOW);//Semaforo#3 Seguir  Verde     Encendido
+digitalWrite (Color[14],HIGH);//Semaforo#3 Seguir  Rojo      Encendido
+//Semaforo#3 Doblar
+digitalWrite (Color[115],LOW);//Semaforo#3 Doblar  Verde     Encendido
+digitalWrite (Color[117],HIGH);//Semaforo#3 Doblar  Rojo      Encendido
+//Semaforo#4 Seguir
+digitalWrite (Color[18],LOW);//Semaforo#4 Seguir  Verde     Encendido
+digitalWrite (Color[20],HIGH);//Semaforo#4 Seguir  Rojo      Encendido
+//Semaforo#4 Doblar
+digitalWrite (Color[21],LOW);//Semaforo#4 Doblar  Verde     Encendido
+digitalWrite (Color[23],HIGH);//Semaforo#4 Doblar  Rojo      Encendido
+
+  }
+
+  if ('G' == mens){
+
+    //Semaforo#1 seguir
+digitalWrite (Color[0],LOW);//Semaforo#1 Seguir Verde      Encendido
+digitalWrite (Color[2],HIGH);//Semaforo#1 Seguir Rojo       Encendido
+//Semaforo#1 Doblar
+digitalWrite (Color[3],LOW);//Semaforo#1 Doblar   Verde     Encendido
+digitalWrite (Color[5],HIGH);//Semaforo#1 Doblar   Rojo      Encendido
+//Semaforo#2 Seguir
+digitalWrite (Color[6],LOW);//Semaforo#2 Seguir   Verde     Encendido
+digitalWrite (Color[8],HIGH);//Semaforo#2 Seguir   Rojo      Encendido
+//Semaforo#2 Doblar
+digitalWrite (Color[9],LOW);//Semaforo#2 Doblar   Verde     Encendido
+digitalWrite (Color[11],HIGH);//Semaforo#2 Doblar   Rojo      Encendido
+//Semaforo#3 Seguir
+digitalWrite (Color[12],HIGH);//Semaforo#3 Seguir  Verde     Encendido
+digitalWrite (Color[14],LOW);//Semaforo#3 Seguir  Rojo      Encendido
+//Semaforo#3 Doblar
+digitalWrite (Color[15],LOW);//Semaforo#3 Doblar  Verde     Encendido
+digitalWrite (Color[17],HIGH);//Semaforo#3 Doblar  Rojo      Encendido
+//Semaforo#4 Seguir
+digitalWrite (Color[18],LOW);//Semaforo#4 Seguir  Verde     Encendido
+digitalWrite (Color[20],HIGH);//Semaforo#4 Seguir  Rojo      Encendido
+//Semaforo#4 Doblar
+digitalWrite (Color[21],LOW);//Semaforo#4 Doblar  Verde     Encendido
+digitalWrite (Color[23],HIGH);//Semaforo#4 Doblar  Rojo      Encendido
+  }
+
+if ('H' == mens){
+
+
+  //Semaforo#1 seguir
+digitalWrite (Color[0],LOW);//Semaforo#1 Seguir Verde      Encendido
+digitalWrite (Color[2],HIGH);//Semaforo#1 Seguir Rojo       Encendido
+//Semaforo#1 Doblar
+digitalWrite (Color[3],LOW);//Semaforo#1 Doblar   Verde     Encendido
+digitalWrite (Color[5],HIGH);//Semaforo#1 Doblar   Rojo      Encendido
+//Semaforo#2 Seguir
+digitalWrite (Color[6],LOW);//Semaforo#2 Seguir   Verde     Encendido
+digitalWrite (Color[8],HIGH);//Semaforo#2 Seguir   Rojo      Encendido
+//Semaforo#2 Doblar
+digitalWrite (Color[9],LOW);//Semaforo#2 Doblar   Verde     Encendido
+digitalWrite (Color[11],HIGH);//Semaforo#2 Doblar   Rojo      Encendido
+//Semaforo#3 Seguir
+digitalWrite (Color[12],LOW);//Semaforo#3 Seguir  Verde     Encendido
+digitalWrite (Color[14],HIGH);//Semaforo#3 Seguir  Rojo      Encendido
+//Semaforo#3 Doblar
+digitalWrite (Color[15],HIGH);//Semaforo#3 Doblar  Verde     Encendido
+digitalWrite (Color[17],LOW);//Semaforo#3 Doblar  Rojo      Encendido
+//Semaforo#4 Seguir
+digitalWrite (Color[18],LOW);//Semaforo#4 Seguir  Verde     Encendido
+digitalWrite (Color[20],HIGH);//Semaforo#4 Seguir  Rojo      Encendido
+//Semaforo#4 Doblar
+digitalWrite (Color[21],LOW);//Semaforo#4 Doblar  Verde     Encendido
+digitalWrite (Color[23],HIGH);//Semaforo#4 Doblar  Rojo      Encendido
+}
+
+
+if ('I' == mens){
+
+  //Semaforo#1 seguir
+digitalWrite (Color[0],LOW);//Semaforo#1 Seguir Verde      Encendido
+digitalWrite (Color[2],HIGH);//Semaforo#1 Seguir Rojo       Encendido
+//Semaforo#1 Doblar
+digitalWrite (Color[3],LOW);//Semaforo#1 Doblar   Verde     Encendido
+digitalWrite (Color[5],HIGH);//Semaforo#1 Doblar   Rojo      Encendido
+//Semaforo#2 Seguir
+digitalWrite (Color[6],LOW);//Semaforo#2 Seguir   Verde     Encendido
+digitalWrite (Color[8],HIGH);//Semaforo#2 Seguir   Rojo      Encendido
+//Semaforo#2 Doblar
+digitalWrite (Color[9],LOW);//Semaforo#2 Doblar   Verde     Encendido
+digitalWrite (Color[11],HIGH);//Semaforo#2 Doblar   Rojo      Encendido
+//Semaforo#3 Seguir
+digitalWrite (Color[12],HIGH);//Semaforo#3 Seguir  Verde     Encendido
+digitalWrite (Color[14],LOW);//Semaforo#3 Seguir  Rojo      Encendido
+//Semaforo#3 Doblar
+digitalWrite (Color[15],HIGH);//Semaforo#3 Doblar  Verde     Encendido
+digitalWrite (Color[17],LOW);//Semaforo#3 Doblar  Rojo      Encendido
+//Semaforo#4 Seguir
+digitalWrite (Color[18],LOW);//Semaforo#4 Seguir  Verde     Encendido
+digitalWrite (Color[20],HIGH);//Semaforo#4 Seguir  Rojo      Encendido
+//Semaforo#4 Doblar
+digitalWrite (Color[21],LOW);//Semaforo#4 Doblar  Verde     Encendido
+digitalWrite (Color[23],HIGH);//Semaforo#4 Doblar  Rojo      Encendido
+  
+}
+
+if ('J' == mens){
+
+  //Semaforo#1 seguir
+digitalWrite (Color[0],LOW);//Semaforo#1 Seguir Verde      Encendido
+digitalWrite (Color[2],HIGH);//Semaforo#1 Seguir Rojo       Encendido
+//Semaforo#1 Doblar
+digitalWrite (Color[3],LOW);//Semaforo#1 Doblar   Verde     Encendido
+digitalWrite (Color[5],HIGH);//Semaforo#1 Doblar   Rojo      Encendido
+//Semaforo#2 Seguir
+digitalWrite (Color[6],LOW);//Semaforo#2 Seguir   Verde     Encendido
+digitalWrite (Color[8],HIGH);//Semaforo#2 Seguir   Rojo      Encendido
+//Semaforo#2 Doblar
+digitalWrite (Color[9],LOW);//Semaforo#2 Doblar   Verde     Encendido
+digitalWrite (Color[11],HIGH);//Semaforo#2 Doblar   Rojo      Encendido
+//Semaforo#3 Seguir
+digitalWrite (Color[12],LOW);//Semaforo#3 Seguir  Verde     Encendido
+digitalWrite (Color[14],HIGH);//Semaforo#3 Seguir  Rojo      Encendido
+//Semaforo#3 Doblar
+digitalWrite (Color[15],LOW);//Semaforo#3 Doblar  Verde     Encendido
+digitalWrite (Color[17],HIGH);//Semaforo#3 Doblar  Rojo      Encendido
+//Semaforo#4 Seguir
+digitalWrite (Color[18],HIGH);//Semaforo#4 Seguir  Verde     Encendido
+digitalWrite (Color[20],LOW);//Semaforo#4 Seguir  Rojo      Encendido
+//Semaforo#4 Doblar
+digitalWrite (Color[21],LOW);//Semaforo#4 Doblar  Verde     Encendido
+digitalWrite (Color[23],HIGH);//Semaforo#4 Doblar  Rojo      Encendido
+
+}
+
+if ('K' == mens){
+
+  //Semaforo#1 seguir
+digitalWrite (Color[0],LOW);//Semaforo#1 Seguir Verde      Encendido
+digitalWrite (Color[2],HIGH);//Semaforo#1 Seguir Rojo       Encendido
+//Semaforo#1 Doblar
+digitalWrite (Color[3],LOW);//Semaforo#1 Doblar   Verde     Encendido
+digitalWrite (Color[5],HIGH);//Semaforo#1 Doblar   Rojo      Encendido
+//Semaforo#2 Seguir
+digitalWrite (Color[6],LOW);//Semaforo#2 Seguir   Verde     Encendido
+digitalWrite (Color[8],HIGH);//Semaforo#2 Seguir   Rojo      Encendido
+//Semaforo#2 Doblar
+digitalWrite (Color[9],LOW);//Semaforo#2 Doblar   Verde     Encendido
+digitalWrite (Color[11],HIGH);//Semaforo#2 Doblar   Rojo      Encendido
+//Semaforo#3 Seguir
+digitalWrite (Color[12],LOW);//Semaforo#3 Seguir  Verde     Encendido
+digitalWrite (Color[14],HIGH);//Semaforo#3 Seguir  Rojo      Encendido
+//Semaforo#3 Doblar
+digitalWrite (Color[15],LOW);//Semaforo#3 Doblar  Verde     Encendido
+digitalWrite (Color[17],HIGH);//Semaforo#3 Doblar  Rojo      Encendido
+//Semaforo#4 Seguir
+digitalWrite (Color[18],LOW);//Semaforo#4 Seguir  Verde     Encendido
+digitalWrite (Color[20],HIGH);//Semaforo#4 Seguir  Rojo      Encendido
+//Semaforo#4 Doblar
+digitalWrite (Color[21],HIGH);//Semaforo#4 Doblar  Verde     Encendido
+digitalWrite (Color[23],LOW);//Semaforo#4 Doblar  Rojo      Encendido
+}
+
+if ('L' == mens){
+
+  ///Semaforo#1 seguir
+digitalWrite (Color[0],LOW);//Semaforo#1 Seguir Verde      Encendido
+digitalWrite (Color[2],HIGH);//Semaforo#1 Seguir Rojo       Encendido
+//Semaforo#1 Doblar
+digitalWrite (Color[3],LOW);//Semaforo#1 Doblar   Verde     Encendido
+digitalWrite (Color[5],HIGH);//Semaforo#1 Doblar   Rojo      Encendido
+//Semaforo#2 Seguir
+digitalWrite (Color[6],LOW);//Semaforo#2 Seguir   Verde     Encendido
+digitalWrite (Color[8],HIGH);//Semaforo#2 Seguir   Rojo      Encendido
+//Semaforo#2 Doblar
+digitalWrite (Color[9],LOW);//Semaforo#2 Doblar   Verde     Encendido
+digitalWrite (Color[11],HIGH);//Semaforo#2 Doblar   Rojo      Encendido
+//Semaforo#3 Seguir
+digitalWrite (Color[12],LOW);//Semaforo#3 Seguir  Verde     Encendido
+digitalWrite (Color[14],HIGH);//Semaforo#3 Seguir  Rojo      Encendido
+//Semaforo#3 Doblar
+digitalWrite (Color[15],LOW);//Semaforo#3 Doblar  Verde     Encendido
+digitalWrite (Color[17],HIGH);//Semaforo#3 Doblar  Rojo      Encendido
+//Semaforo#4 Seguir
+digitalWrite (Color[18],HIGH);//Semaforo#4 Seguir  Verde     Encendido
+digitalWrite (Color[20],LOW);//Semaforo#4 Seguir  Rojo      Encendido
+//Semaforo#4 Doblar
+digitalWrite (Color[21],HIGH);//Semaforo#4 Doblar  Verde     Encendido
+digitalWrite (Color[23],LOW);//Semaforo#4 Doblar  Rojo      Encendido
+  
+}
+if ('M' == mens){
+  
+  //Semaforo#1 seguir
+digitalWrite (Color[0],HIGH);//Semaforo#1 Seguir Verde      Encendido
+digitalWrite (Color[2],LOW);//Semaforo#1 Seguir Rojo       Encendido
+//Semaforo#1 Doblar
+digitalWrite (Color[3],LOW);//Semaforo#1 Doblar   Verde     Encendido
+digitalWrite (Color[5],HIGH);//Semaforo#1 Doblar   Rojo      Encendido
+//Semaforo#2 Seguir
+digitalWrite (Color[6],LOW);//Semaforo#2 Seguir   Verde     Encendido
+digitalWrite (Color[8],HIGH);//Semaforo#2 Seguir   Rojo      Encendido
+//Semaforo#2 Doblar
+digitalWrite (Color[9],LOW);//Semaforo#2 Doblar   Verde     Encendido
+digitalWrite (Color[11],HIGH);//Semaforo#2 Doblar   Rojo      Encendido
+//Semaforo#3 Seguir
+digitalWrite (Color[12],HIGH);//Semaforo#3 Seguir  Verde     Encendido
+digitalWrite (Color[14],LOW);//Semaforo#3 Seguir  Rojo      Encendido
+//Semaforo#3 Doblar
+digitalWrite (Color[15],LOW);//Semaforo#3 Doblar  Verde     Encendido
+digitalWrite (Color[17],HIGH);//Semaforo#3 Doblar  Rojo      Encendido
+//Semaforo#4 Seguir
+digitalWrite (Color[18],LOW);//Semaforo#4 Seguir  Verde     Encendido
+digitalWrite (Color[20],HIGH);//Semaforo#4 Seguir  Rojo      Encendido
+//Semaforo#4 Doblar
+digitalWrite (Color[21],LOW);//Semaforo#4 Doblar  Verde     Encendido
+digitalWrite (Color[23],HIGH);//Semaforo#4 Doblar  Rojo      Encendido
+
+  }
+
+if ('N' == mens){
+  
+ 
+//Semaforo#1 seguir
+digitalWrite (Color[0],LOW);//Semaforo#1 Seguir Verde      Encendido
+digitalWrite (Color[2],HIGH);//Semaforo#1 Seguir Rojo       Encendido
+//Semaforo#1 Doblar
+digitalWrite (Color[3],HIGH);//Semaforo#1 Doblar   Verde     Encendido
+digitalWrite (Color[5],LOW);//Semaforo#1 Doblar   Rojo      Encendido
+//Semaforo#2 Seguir
+digitalWrite (Color[6],LOW);//Semaforo#2 Seguir   Verde     Encendido
+digitalWrite (Color[8],HIGH);//Semaforo#2 Seguir   Rojo      Encendido
+//Semaforo#2 Doblar
+digitalWrite (Color[9],LOW);//Semaforo#2 Doblar   Verde     Encendido
+digitalWrite (Color[11],HIGH);//Semaforo#2 Doblar   Rojo      Encendido
+//Semaforo#3 Seguir
+digitalWrite (Color[12],LOW);//Semaforo#3 Seguir  Verde     Encendido
+digitalWrite (Color[14],HIGH);//Semaforo#3 Seguir  Rojo      Encendido
+//Semaforo#3 Doblar
+digitalWrite (Color[15],HIGH);//Semaforo#3 Doblar  Verde     Encendido
+digitalWrite (Color[17],LOW);//Semaforo#3 Doblar  Rojo      Encendido
+//Semaforo#4 Seguir
+digitalWrite (Color[18],LOW);//Semaforo#4 Seguir  Verde     Encendido
+digitalWrite (Color[20],HIGH);//Semaforo#4 Seguir  Rojo      Encendido
+//Semaforo#4 Doblar
+digitalWrite (Color[21],LOW);//Semaforo#4 Doblar  Verde     Encendido
+digitalWrite (Color[23],HIGH);//Semaforo#4 Doblar  Rojo      Encendido
+ 
+  }
+ if ('0' == mens){ 
+  
+ //Semaforo#1 seguir
+digitalWrite (Color[0],LOW);//Semaforo#1 Seguir Verde      Encendido
+digitalWrite (Color[2],HIGH);//Semaforo#1 Seguir Rojo       Encendido
+//Semaforo#1 Doblar
+digitalWrite (Color[3],LOW);//Semaforo#1 Doblar   Verde     Encendido
+digitalWrite (Color[5],HIGH);//Semaforo#1 Doblar   Rojo      Encendido
+//Semaforo#2 Seguir
+digitalWrite (Color[6],HIGH);//Semaforo#2 Seguir   Verde     Encendido
+digitalWrite (Color[8],LOW);//Semaforo#2 Seguir   Rojo      Encendido
+//Semaforo#2 Doblar
+digitalWrite (Color[9],LOW);//Semaforo#2 Doblar   Verde     Encendido
+digitalWrite (Color[11],HIGH);//Semaforo#2 Doblar   Rojo      Encendido
+//Semaforo#3 Seguir
+digitalWrite (Color[12],LOW);//Semaforo#3 Seguir  Verde     Encendido
+digitalWrite (Color[14],HIGH);//Semaforo#3 Seguir  Rojo      Encendido
+//Semaforo#3 Doblar
+digitalWrite (Color[15],LOW);//Semaforo#3 Doblar  Verde     Encendido
+digitalWrite (Color[17],HIGH);//Semaforo#3 Doblar  Rojo      Encendido
+//Semaforo#4 Seguir
+digitalWrite (Color[18],HIGH);//Semaforo#4 Seguir  Verde     Encendido
+digitalWrite (Color[20],LOW);//Semaforo#4 Seguir  Rojo      Encendido
+//Semaforo#4 Doblar
+digitalWrite (Color[21],LOW);//Semaforo#4 Doblar  Verde     Encendido
+digitalWrite (Color[23],HIGH);//Semaforo#4 Doblar  Rojo      Encendido 
+  }
+
+ if ('P' == mens){
+
+//Semaforo#1 seguir
+digitalWrite (Color[0],LOW);//Semaforo#1 Seguir Verde      Encendido
+digitalWrite (Color[2],HIGH);//Semaforo#1 Seguir Rojo       Encendido
+//Semaforo#1 Doblar
+digitalWrite (Color[3],LOW);//Semaforo#1 Doblar   Verde     Encendido
+digitalWrite (Color[5],HIGH);//Semaforo#1 Doblar   Rojo      Encendido
+//Semaforo#2 Seguir
+digitalWrite (Color[6],LOW);//Semaforo#2 Seguir   Verde     Encendido
+digitalWrite (Color[8],HIGH);//Semaforo#2 Seguir   Rojo      Encendido
+//Semaforo#2 Doblar
+digitalWrite (Color[9],HIGH);//Semaforo#2 Doblar   Verde     Encendido
+digitalWrite (Color[11],LOW);//Semaforo#2 Doblar   Rojo      Encendido
+//Semaforo#3 Seguir
+digitalWrite (Color[12],LOW);//Semaforo#3 Seguir  Verde     Encendido
+digitalWrite (Color[14],HIGH);//Semaforo#3 Seguir  Rojo      Encendido
+//Semaforo#3 Doblar
+digitalWrite (Color[15],LOW);//Semaforo#3 Doblar  Verde     Encendido
+digitalWrite (Color[17],HIGH);//Semaforo#3 Doblar  Rojo      Encendido
+//Semaforo#4 Seguir
+digitalWrite (Color[18],LOW);//Semaforo#4 Seguir  Verde     Encendido
+digitalWrite (Color[20],HIGH);//Semaforo#4 Seguir  Rojo      Encendido
+//Semaforo#4 Doblar
+digitalWrite (Color[21],HIGH);//Semaforo#4 Doblar  Verde     Encendido
+digitalWrite (Color[23],LOW);//Semaforo#4 Doblar  Rojo      Encendido
+
+ }
+
+ if ('Q' == mens){
+
+//Semaforo#1 seguir
+digitalWrite (Color[0],LOW);//Semaforo#1 Seguir Verde      Encendido
+digitalWrite (Color[2],HIGH);//Semaforo#1 Seguir Rojo       Encendido
+//Semaforo#1 Doblar
+digitalWrite (Color[3],LOW);//Semaforo#1 Doblar   Verde     Encendido
+digitalWrite (Color[5],HIGH);//Semaforo#1 Doblar   Rojo      Encendido
+//Semaforo#2 Seguir
+digitalWrite (Color[6],LOW);//Semaforo#2 Seguir   Verde     Encendido
+digitalWrite (Color[8],HIGH);//Semaforo#2 Seguir   Rojo      Encendido
+//Semaforo#2 Doblar
+digitalWrite (Color[9],LOW);//Semaforo#2 Doblar   Verde     Encendido
+digitalWrite (Color[11],HIGH);//Semaforo#2 Doblar   Rojo      Encendido
+//Semaforo#3 Seguir
+digitalWrite (Color[12],LOW);//Semaforo#3 Seguir  Verde     Encendido
+digitalWrite (Color[14],HIGH);//Semaforo#3 Seguir  Rojo      Encendido
+//Semaforo#3 Doblar
+digitalWrite (Color[15],LOW);//Semaforo#3 Doblar  Verde     Encendido
+digitalWrite (Color[17],HIGH);//Semaforo#3 Doblar  Rojo      Encendido
+//Semaforo#4 Seguir
+digitalWrite (Color[18],LOW);//Semaforo#4 Seguir  Verde     Encendido
+digitalWrite (Color[20],HIGH);//Semaforo#4 Seguir  Rojo      Encendido
+//Semaforo#4 Doblar
+digitalWrite (Color[21],LOW);//Semaforo#4 Doblar  Verde     Encendido
+digitalWrite (Color[23],HIGH);//Semaforo#4 Doblar  Rojo      Encendido
+
+  
+ }
+
+
+//------------------------------------------------Amarillo---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+ if ('~' == mens)
+    {
+
+      //Semaforo#1 seguir
+digitalWrite (Color[1],HIGH);//Semaforo#1 Seguir Verde      Encendido
+digitalWrite (Color[2],LOW);//Semaforo#1 Seguir Rojo       Encendido
+//Semaforo#1 Doblar
+digitalWrite (Color[3],LOW);//Semaforo#1 Doblar   Verde     Encendido
+digitalWrite (Color[5],HIGH);//Semaforo#1 Doblar   Rojo      Encendido
+//Semaforo#2 Seguir
+digitalWrite (Color[6],LOW);//Semaforo#2 Seguir   Verde     Encendido
+digitalWrite (Color[8],HIGH);//Semaforo#2 Seguir   Rojo      Encendido
+//Semaforo#2 Doblar
+digitalWrite (Color[9],LOW);//Semaforo#2 Doblar   Verde     Encendido
+digitalWrite (Color[11],HIGH);//Semaforo#2 Doblar   Rojo      Encendido
+//Semaforo#3 Seguir
+digitalWrite (Color[12],LOW);//Semaforo#3 Seguir  Verde     Encendido
+digitalWrite (Color[14],HIGH);//Semaforo#3 Seguir  Rojo      Encendido
+//Semaforo#3 Doblar
+digitalWrite (Color[15],LOW);//Semaforo#3 Doblar  Verde     Encendido
+digitalWrite (Color[17],HIGH);//Semaforo#3 Doblar  Rojo      Encendido
+//Semaforo#4 Seguir
+digitalWrite (Color[18],LOW);//Semaforo#4 Seguir  Verde     Encendido
+digitalWrite (Color[20],HIGH);//Semaforo#4 Seguir  Rojo      Encendido
+//Semaforo#4 Doblar
+digitalWrite (Color[21],LOW);//Semaforo#4 Doblar  Verde     Encendido
+digitalWrite (Color[23],HIGH);//Semaforo#4 Doblar  Rojo      Encendido
+   
+    }
+
+    if ('!' == mens)
+    {
+
+//B
+  
+//Semaforo#1 seguir
+digitalWrite (Color[0],LOW);//Semaforo#1 Seguir Verde      Encendido
+digitalWrite (Color[2],HIGH);//Semaforo#1 Seguir Rojo       Encendido
+//Semaforo#1 Doblar
+digitalWrite (Color[4],HIGH);//Semaforo#1 Doblar   Verde     Encendido
+digitalWrite (Color[5],LOW);//Semaforo#1 Doblar   Rojo      Encendido
+//Semaforo#2 Seguir
+digitalWrite (Color[6],LOW);//Semaforo#2 Seguir   Verde     Encendido
+digitalWrite (Color[8],HIGH);//Semaforo#2 Seguir   Rojo      Encendido
+//Semaforo#2 Doblar
+digitalWrite (Color[9],LOW);//Semaforo#2 Doblar   Verde     Encendido
+digitalWrite (Color[11],HIGH);//Semaforo#2 Doblar   Rojo      Encendido
+//Semaforo#3 Seguir
+digitalWrite (Color[12],LOW);//Semaforo#3 Seguir  Verde     Encendido
+digitalWrite (Color[14],HIGH);//Semaforo#3 Seguir  Rojo      Encendido
+//Semaforo#3 Doblar
+digitalWrite (Color[15],LOW);//Semaforo#3 Doblar  Verde     Encendido
+digitalWrite (Color[17],HIGH);//Semaforo#3 Doblar  Rojo      Encendido
+//Semaforo#4 Seguir
+digitalWrite (Color[18],LOW);//Semaforo#4 Seguir  Verde     Encendido
+digitalWrite (Color[20],HIGH);//Semaforo#4 Seguir  Rojo      Encendido
+//Semaforo#4 Doblar
+digitalWrite (Color[21],LOW);//Semaforo#4 Doblar  Verde     Encendido
+digitalWrite (Color[23],HIGH);//Semaforo#4 Doblar  Rojo      Encendido
+
+   
+  }
+
+  if ('@' == mens)
+    {
+
+      //Semaforo#1 seguir
+digitalWrite (Color[1],HIGH);//Semaforo#1 Seguir Verde      Encendido
+digitalWrite (Color[2],LOW);//Semaforo#1 Seguir Rojo       Encendido
+//Semaforo#1 Doblar
+digitalWrite (Color[4],HIGH);//Semaforo#1 Doblar   Verde     Encendido
+digitalWrite (Color[5],LOW);//Semaforo#1 Doblar   Rojo      Encendido
+//Semaforo#2 Seguir
+digitalWrite (Color[6],LOW);//Semaforo#2 Seguir   Verde     Encendido
+digitalWrite (Color[8],HIGH);//Semaforo#2 Seguir   Rojo      Encendido
+//Semaforo#2 Doblar
+digitalWrite (Color[9],LOW);//Semaforo#2 Doblar   Verde     Encendido
+digitalWrite (Color[11],HIGH);//Semaforo#2 Doblar   Rojo      Encendido
+//Semaforo#3 Seguir
+digitalWrite (Color[12],LOW);//Semaforo#3 Seguir  Verde     Encendido
+digitalWrite (Color[14],HIGH);//Semaforo#3 Seguir  Rojo      Encendido
+//Semaforo#3 Doblar
+digitalWrite (Color[15],LOW);//Semaforo#3 Doblar  Verde     Encendido
+digitalWrite (Color[17],HIGH);//Semaforo#3 Doblar  Rojo      Encendido
+//Semaforo#4 Seguir
+digitalWrite (Color[18],LOW);//Semaforo#4 Seguir  Verde     Encendido
+digitalWrite (Color[20],HIGH);//Semaforo#4 Seguir  Rojo      Encendido
+//Semaforo#4 Doblar
+digitalWrite (Color[21],LOW);//Semaforo#4 Doblar  Verde     Encendido
+digitalWrite (Color[23],HIGH);//Semaforo#4 Doblar  Rojo      Encendido
+    }
+
+  if ('#' == mens){
+  
+  //Semaforo#1 seguir
+digitalWrite (Color[0],LOW);//Semaforo#1 Seguir Verde      Encendido
+digitalWrite (Color[2],HIGH);//Semaforo#1 Seguir Rojo       Encendido
+//Semaforo#1 Doblar
+digitalWrite (Color[3],LOW);//Semaforo#1 Doblar   Verde     Encendido
+digitalWrite (Color[5],HIGH);//Semaforo#1 Doblar   Rojo      Encendido
+//Semaforo#2 Seguir
+digitalWrite (Color[7],HIGH);//Semaforo#2 Seguir   Verde     Encendido
+digitalWrite (Color[8],LOW);//Semaforo#2 Seguir   Rojo      Encendido
+//Semaforo#2 Doblar
+digitalWrite (Color[9],LOW);//Semaforo#2 Doblar   Verde     Encendido
+digitalWrite (Color[11],HIGH);//Semaforo#2 Doblar   Rojo      Encendido
+//Semaforo#3 Seguir
+digitalWrite (Color[12],LOW);//Semaforo#3 Seguir  Verde     Encendido
+digitalWrite (Color[14],HIGH);//Semaforo#3 Seguir  Rojo      Encendido
+//Semaforo#3 Doblar
+digitalWrite (Color[15],LOW);//Semaforo#3 Doblar  Verde     Encendido
+digitalWrite (Color[17],HIGH);//Semaforo#3 Doblar  Rojo      Encendido
+//Semaforo#4 Seguir
+digitalWrite (Color[18],LOW);//Semaforo#4 Seguir  Verde     Encendido
+digitalWrite (Color[20],HIGH);//Semaforo#4 Seguir  Rojo      Encendido
+//Semaforo#4 Doblar
+digitalWrite (Color[21],LOW);//Semaforo#4 Doblar  Verde     Encendido
+digitalWrite (Color[23],HIGH);//Semaforo#4 Doblar  Rojo      Encendido
+  
+ 
+  }
+
+
+ if ('$' == mens){
+//Semaforo#1 seguir
+digitalWrite (Color[0],LOW);//Semaforo#1 Seguir Verde      Encendido
+digitalWrite (Color[2],HIGH);//Semaforo#1 Seguir Rojo       Encendido
+//Semaforo#1 Doblar
+digitalWrite (Color[3],LOW);//Semaforo#1 Doblar   Verde     Encendido
+digitalWrite (Color[5],HIGH);//Semaforo#1 Doblar   Rojo      Encendido
+//Semaforo#2 Seguir
+digitalWrite (Color[6],LOW);//Semaforo#2 Seguir   Verde     Encendido
+digitalWrite (Color[8],HIGH);//Semaforo#2 Seguir   Rojo      Encendido
+//Semaforo#2 Doblar
+digitalWrite (Color[10],HIGH);//Semaforo#2 Doblar   Verde     Encendido
+digitalWrite (Color[11],LOW);//Semaforo#2 Doblar   Rojo      Encendido
+//Semaforo#3 Seguir
+digitalWrite (Color[12],LOW);//Semaforo#3 Seguir  Verde     Encendido
+digitalWrite (Color[14],HIGH);//Semaforo#3 Seguir  Rojo      Encendido
+//Semaforo#3 Doblar
+digitalWrite (Color[15],LOW);//Semaforo#3 Doblar  Verde     Encendido
+digitalWrite (Color[17],HIGH);//Semaforo#3 Doblar  Rojo      Encendido
+//Semaforo#4 Seguir
+digitalWrite (Color[18],LOW);//Semaforo#4 Seguir  Verde     Encendido
+digitalWrite (Color[20],HIGH);//Semaforo#4 Seguir  Rojo      Encendido
+//Semaforo#4 Doblar
+digitalWrite (Color[21],LOW);//Semaforo#4 Doblar  Verde     Encendido
+digitalWrite (Color[23],HIGH);//Semaforo#4 Doblar  Rojo      Encendido
+ }
+
+  if ('%' == mens){
+
+    //Semaforo#1 seguir
+digitalWrite (Color[0],LOW);//Semaforo#1 Seguir Verde      Encendido
+digitalWrite (Color[2],HIGH);//Semaforo#1 Seguir Rojo       Encendido
+//Semaforo#1 Doblar
+digitalWrite (Color[3],LOW);//Semaforo#1 Doblar   Verde     Encendido
+digitalWrite (Color[5],HIGH);//Semaforo#1 Doblar   Rojo      Encendido
+//Semaforo#2 Seguir
+digitalWrite (Color[7],HIGH);//Semaforo#2 Seguir   Verde     Encendido
+digitalWrite (Color[8],LOW);//Semaforo#2 Seguir   Rojo      Encendido
+//Semaforo#2 Doblar
+digitalWrite (Color[10],HIGH);//Semaforo#2 Doblar   Verde     Encendido
+digitalWrite (Color[11],LOW);//Semaforo#2 Doblar   Rojo      Encendido
+//Semaforo#3 Seguir
+digitalWrite (Color[12],LOW);//Semaforo#3 Seguir  Verde     Encendido
+digitalWrite (Color[14],HIGH);//Semaforo#3 Seguir  Rojo      Encendido
+//Semaforo#3 Doblar
+digitalWrite (Color[115],LOW);//Semaforo#3 Doblar  Verde     Encendido
+digitalWrite (Color[117],HIGH);//Semaforo#3 Doblar  Rojo      Encendido
+//Semaforo#4 Seguir
+digitalWrite (Color[18],LOW);//Semaforo#4 Seguir  Verde     Encendido
+digitalWrite (Color[20],HIGH);//Semaforo#4 Seguir  Rojo      Encendido
+//Semaforo#4 Doblar
+digitalWrite (Color[21],LOW);//Semaforo#4 Doblar  Verde     Encendido
+digitalWrite (Color[23],HIGH);//Semaforo#4 Doblar  Rojo      Encendido
+
+  }
+
+  if ('^' == mens){
+
+    //Semaforo#1 seguir
+digitalWrite (Color[0],LOW);//Semaforo#1 Seguir Verde      Encendido
+digitalWrite (Color[2],HIGH);//Semaforo#1 Seguir Rojo       Encendido
+//Semaforo#1 Doblar
+digitalWrite (Color[3],LOW);//Semaforo#1 Doblar   Verde     Encendido
+digitalWrite (Color[5],HIGH);//Semaforo#1 Doblar   Rojo      Encendido
+//Semaforo#2 Seguir
+digitalWrite (Color[6],LOW);//Semaforo#2 Seguir   Verde     Encendido
+digitalWrite (Color[8],HIGH);//Semaforo#2 Seguir   Rojo      Encendido
+//Semaforo#2 Doblar
+digitalWrite (Color[9],LOW);//Semaforo#2 Doblar   Verde     Encendido
+digitalWrite (Color[11],HIGH);//Semaforo#2 Doblar   Rojo      Encendido
+//Semaforo#3 Seguir
+digitalWrite (Color[13],HIGH);//Semaforo#3 Seguir  Verde     Encendido
+digitalWrite (Color[14],LOW);//Semaforo#3 Seguir  Rojo      Encendido
+//Semaforo#3 Doblar
+digitalWrite (Color[15],LOW);//Semaforo#3 Doblar  Verde     Encendido
+digitalWrite (Color[17],HIGH);//Semaforo#3 Doblar  Rojo      Encendido
+//Semaforo#4 Seguir
+digitalWrite (Color[18],LOW);//Semaforo#4 Seguir  Verde     Encendido
+digitalWrite (Color[20],HIGH);//Semaforo#4 Seguir  Rojo      Encendido
+//Semaforo#4 Doblar
+digitalWrite (Color[21],LOW);//Semaforo#4 Doblar  Verde     Encendido
+digitalWrite (Color[23],HIGH);//Semaforo#4 Doblar  Rojo      Encendido
+  }
+
+if ('&' == mens){
+
+
+  //Semaforo#1 seguir
+digitalWrite (Color[0],LOW);//Semaforo#1 Seguir Verde      Encendido
+digitalWrite (Color[2],HIGH);//Semaforo#1 Seguir Rojo       Encendido
+//Semaforo#1 Doblar
+digitalWrite (Color[3],LOW);//Semaforo#1 Doblar   Verde     Encendido
+digitalWrite (Color[5],HIGH);//Semaforo#1 Doblar   Rojo      Encendido
+//Semaforo#2 Seguir
+digitalWrite (Color[6],LOW);//Semaforo#2 Seguir   Verde     Encendido
+digitalWrite (Color[8],HIGH);//Semaforo#2 Seguir   Rojo      Encendido
+//Semaforo#2 Doblar
+digitalWrite (Color[9],LOW);//Semaforo#2 Doblar   Verde     Encendido
+digitalWrite (Color[11],HIGH);//Semaforo#2 Doblar   Rojo      Encendido
+//Semaforo#3 Seguir
+digitalWrite (Color[12],LOW);//Semaforo#3 Seguir  Verde     Encendido
+digitalWrite (Color[14],HIGH);//Semaforo#3 Seguir  Rojo      Encendido
+//Semaforo#3 Doblar
+digitalWrite (Color[16],HIGH);//Semaforo#3 Doblar  Verde     Encendido
+digitalWrite (Color[17],LOW);//Semaforo#3 Doblar  Rojo      Encendido
+//Semaforo#4 Seguir
+digitalWrite (Color[18],LOW);//Semaforo#4 Seguir  Verde     Encendido
+digitalWrite (Color[20],HIGH);//Semaforo#4 Seguir  Rojo      Encendido
+//Semaforo#4 Doblar
+digitalWrite (Color[21],LOW);//Semaforo#4 Doblar  Verde     Encendido
+digitalWrite (Color[23],HIGH);//Semaforo#4 Doblar  Rojo      Encendido
+}
+
+
+if ('*' == mens){
+
+  //Semaforo#1 seguir
+digitalWrite (Color[0],LOW);//Semaforo#1 Seguir Verde      Encendido
+digitalWrite (Color[2],HIGH);//Semaforo#1 Seguir Rojo       Encendido
+//Semaforo#1 Doblar
+digitalWrite (Color[3],LOW);//Semaforo#1 Doblar   Verde     Encendido
+digitalWrite (Color[5],HIGH);//Semaforo#1 Doblar   Rojo      Encendido
+//Semaforo#2 Seguir
+digitalWrite (Color[6],LOW);//Semaforo#2 Seguir   Verde     Encendido
+digitalWrite (Color[8],HIGH);//Semaforo#2 Seguir   Rojo      Encendido
+//Semaforo#2 Doblar
+digitalWrite (Color[9],LOW);//Semaforo#2 Doblar   Verde     Encendido
+digitalWrite (Color[11],HIGH);//Semaforo#2 Doblar   Rojo      Encendido
+//Semaforo#3 Seguir
+digitalWrite (Color[13],HIGH);//Semaforo#3 Seguir  Verde     Encendido
+digitalWrite (Color[14],LOW);//Semaforo#3 Seguir  Rojo      Encendido
+//Semaforo#3 Doblar
+digitalWrite (Color[16],HIGH);//Semaforo#3 Doblar  Verde     Encendido
+digitalWrite (Color[17],LOW);//Semaforo#3 Doblar  Rojo      Encendido
+//Semaforo#4 Seguir
+digitalWrite (Color[18],LOW);//Semaforo#4 Seguir  Verde     Encendido
+digitalWrite (Color[20],HIGH);//Semaforo#4 Seguir  Rojo      Encendido
+//Semaforo#4 Doblar
+digitalWrite (Color[21],LOW);//Semaforo#4 Doblar  Verde     Encendido
+digitalWrite (Color[23],HIGH);//Semaforo#4 Doblar  Rojo      Encendido
+  
+}
+
+if ('(' == mens){
+
+  //Semaforo#1 seguir
+digitalWrite (Color[0],LOW);//Semaforo#1 Seguir Verde      Encendido
+digitalWrite (Color[2],HIGH);//Semaforo#1 Seguir Rojo       Encendido
+//Semaforo#1 Doblar
+digitalWrite (Color[3],LOW);//Semaforo#1 Doblar   Verde     Encendido
+digitalWrite (Color[5],HIGH);//Semaforo#1 Doblar   Rojo      Encendido
+//Semaforo#2 Seguir
+digitalWrite (Color[6],LOW);//Semaforo#2 Seguir   Verde     Encendido
+digitalWrite (Color[8],HIGH);//Semaforo#2 Seguir   Rojo      Encendido
+//Semaforo#2 Doblar
+digitalWrite (Color[9],LOW);//Semaforo#2 Doblar   Verde     Encendido
+digitalWrite (Color[11],HIGH);//Semaforo#2 Doblar   Rojo      Encendido
+//Semaforo#3 Seguir
+digitalWrite (Color[12],LOW);//Semaforo#3 Seguir  Verde     Encendido
+digitalWrite (Color[14],HIGH);//Semaforo#3 Seguir  Rojo      Encendido
+//Semaforo#3 Doblar
+digitalWrite (Color[15],LOW);//Semaforo#3 Doblar  Verde     Encendido
+digitalWrite (Color[17],HIGH);//Semaforo#3 Doblar  Rojo      Encendido
+//Semaforo#4 Seguir
+digitalWrite (Color[19],HIGH);//Semaforo#4 Seguir  Verde     Encendido
+digitalWrite (Color[20],LOW);//Semaforo#4 Seguir  Rojo      Encendido
+//Semaforo#4 Doblar
+digitalWrite (Color[21],LOW);//Semaforo#4 Doblar  Verde     Encendido
+digitalWrite (Color[23],HIGH);//Semaforo#4 Doblar  Rojo      Encendido
+
+}
+
+if (')' == mens){
+
+  //Semaforo#1 seguir
+digitalWrite (Color[0],LOW);//Semaforo#1 Seguir Verde      Encendido
+digitalWrite (Color[2],HIGH);//Semaforo#1 Seguir Rojo       Encendido
+//Semaforo#1 Doblar
+digitalWrite (Color[3],LOW);//Semaforo#1 Doblar   Verde     Encendido
+digitalWrite (Color[5],HIGH);//Semaforo#1 Doblar   Rojo      Encendido
+//Semaforo#2 Seguir
+digitalWrite (Color[6],LOW);//Semaforo#2 Seguir   Verde     Encendido
+digitalWrite (Color[8],HIGH);//Semaforo#2 Seguir   Rojo      Encendido
+//Semaforo#2 Doblar
+digitalWrite (Color[9],LOW);//Semaforo#2 Doblar   Verde     Encendido
+digitalWrite (Color[11],HIGH);//Semaforo#2 Doblar   Rojo      Encendido
+//Semaforo#3 Seguir
+digitalWrite (Color[12],LOW);//Semaforo#3 Seguir  Verde     Encendido
+digitalWrite (Color[14],HIGH);//Semaforo#3 Seguir  Rojo      Encendido
+//Semaforo#3 Doblar
+digitalWrite (Color[15],LOW);//Semaforo#3 Doblar  Verde     Encendido
+digitalWrite (Color[17],HIGH);//Semaforo#3 Doblar  Rojo      Encendido
+//Semaforo#4 Seguir
+digitalWrite (Color[18],LOW);//Semaforo#4 Seguir  Verde     Encendido
+digitalWrite (Color[20],HIGH);//Semaforo#4 Seguir  Rojo      Encendido
+//Semaforo#4 Doblar
+digitalWrite (Color[22],HIGH);//Semaforo#4 Doblar  Verde     Encendido
+digitalWrite (Color[23],LOW);//Semaforo#4 Doblar  Rojo      Encendido
+}
+
+if ('_' == mens){
+
+  ///Semaforo#1 seguir
+digitalWrite (Color[0],LOW);//Semaforo#1 Seguir Verde      Encendido
+digitalWrite (Color[2],HIGH);//Semaforo#1 Seguir Rojo       Encendido
+//Semaforo#1 Doblar
+digitalWrite (Color[3],LOW);//Semaforo#1 Doblar   Verde     Encendido
+digitalWrite (Color[5],HIGH);//Semaforo#1 Doblar   Rojo      Encendido
+//Semaforo#2 Seguir
+digitalWrite (Color[6],LOW);//Semaforo#2 Seguir   Verde     Encendido
+digitalWrite (Color[8],HIGH);//Semaforo#2 Seguir   Rojo      Encendido
+//Semaforo#2 Doblar
+digitalWrite (Color[9],LOW);//Semaforo#2 Doblar   Verde     Encendido
+digitalWrite (Color[11],HIGH);//Semaforo#2 Doblar   Rojo      Encendido
+//Semaforo#3 Seguir
+digitalWrite (Color[12],LOW);//Semaforo#3 Seguir  Verde     Encendido
+digitalWrite (Color[14],HIGH);//Semaforo#3 Seguir  Rojo      Encendido
+//Semaforo#3 Doblar
+digitalWrite (Color[15],LOW);//Semaforo#3 Doblar  Verde     Encendido
+digitalWrite (Color[17],HIGH);//Semaforo#3 Doblar  Rojo      Encendido
+//Semaforo#4 Seguir
+digitalWrite (Color[19],HIGH);//Semaforo#4 Seguir  Verde     Encendido
+digitalWrite (Color[20],LOW);//Semaforo#4 Seguir  Rojo      Encendido
+//Semaforo#4 Doblar
+digitalWrite (Color[22],HIGH);//Semaforo#4 Doblar  Verde     Encendido
+digitalWrite (Color[23],LOW);//Semaforo#4 Doblar  Rojo      Encendido
+  
+}
+if ('+' == mens){
+  
+  //Semaforo#1 seguir
+digitalWrite (Color[1],HIGH);//Semaforo#1 Seguir Verde      Encendido
+digitalWrite (Color[2],LOW);//Semaforo#1 Seguir Rojo       Encendido
+//Semaforo#1 Doblar
+digitalWrite (Color[3],LOW);//Semaforo#1 Doblar   Verde     Encendido
+digitalWrite (Color[5],HIGH);//Semaforo#1 Doblar   Rojo      Encendido
+//Semaforo#2 Seguir
+digitalWrite (Color[6],LOW);//Semaforo#2 Seguir   Verde     Encendido
+digitalWrite (Color[8],HIGH);//Semaforo#2 Seguir   Rojo      Encendido
+//Semaforo#2 Doblar
+digitalWrite (Color[9],LOW);//Semaforo#2 Doblar   Verde     Encendido
+digitalWrite (Color[11],HIGH);//Semaforo#2 Doblar   Rojo      Encendido
+//Semaforo#3 Seguir
+digitalWrite (Color[13],HIGH);//Semaforo#3 Seguir  Verde     Encendido
+digitalWrite (Color[14],LOW);//Semaforo#3 Seguir  Rojo      Encendido
+//Semaforo#3 Doblar
+digitalWrite (Color[15],LOW);//Semaforo#3 Doblar  Verde     Encendido
+digitalWrite (Color[17],HIGH);//Semaforo#3 Doblar  Rojo      Encendido
+//Semaforo#4 Seguir
+digitalWrite (Color[18],LOW);//Semaforo#4 Seguir  Verde     Encendido
+digitalWrite (Color[20],HIGH);//Semaforo#4 Seguir  Rojo      Encendido
+//Semaforo#4 Doblar
+digitalWrite (Color[21],LOW);//Semaforo#4 Doblar  Verde     Encendido
+digitalWrite (Color[23],HIGH);//Semaforo#4 Doblar  Rojo      Encendido
+
+  }
+
+if ('{' == mens){
+  
+ 
+//Semaforo#1 seguir
+digitalWrite (Color[0],LOW);//Semaforo#1 Seguir Verde      Encendido
+digitalWrite (Color[2],HIGH);//Semaforo#1 Seguir Rojo       Encendido
+//Semaforo#1 Doblar
+digitalWrite (Color[4],HIGH);//Semaforo#1 Doblar   Verde     Encendido
+digitalWrite (Color[5],LOW);//Semaforo#1 Doblar   Rojo      Encendido
+//Semaforo#2 Seguir
+digitalWrite (Color[6],LOW);//Semaforo#2 Seguir   Verde     Encendido
+digitalWrite (Color[8],HIGH);//Semaforo#2 Seguir   Rojo      Encendido
+//Semaforo#2 Doblar
+digitalWrite (Color[9],LOW);//Semaforo#2 Doblar   Verde     Encendido
+digitalWrite (Color[11],HIGH);//Semaforo#2 Doblar   Rojo      Encendido
+//Semaforo#3 Seguir
+digitalWrite (Color[12],LOW);//Semaforo#3 Seguir  Verde     Encendido
+digitalWrite (Color[14],HIGH);//Semaforo#3 Seguir  Rojo      Encendido
+//Semaforo#3 Doblar
+digitalWrite (Color[16],HIGH);//Semaforo#3 Doblar  Verde     Encendido
+digitalWrite (Color[17],LOW);//Semaforo#3 Doblar  Rojo      Encendido
+//Semaforo#4 Seguir
+digitalWrite (Color[18],LOW);//Semaforo#4 Seguir  Verde     Encendido
+digitalWrite (Color[20],HIGH);//Semaforo#4 Seguir  Rojo      Encendido
+//Semaforo#4 Doblar
+digitalWrite (Color[21],LOW);//Semaforo#4 Doblar  Verde     Encendido
+digitalWrite (Color[23],HIGH);//Semaforo#4 Doblar  Rojo      Encendido
+ 
+  }
+ if ('}' == mens){ 
+  
+ //Semaforo#1 seguir
+digitalWrite (Color[0],LOW);//Semaforo#1 Seguir Verde      Encendido
+digitalWrite (Color[2],HIGH);//Semaforo#1 Seguir Rojo       Encendido
+//Semaforo#1 Doblar
+digitalWrite (Color[3],LOW);//Semaforo#1 Doblar   Verde     Encendido
+digitalWrite (Color[5],HIGH);//Semaforo#1 Doblar   Rojo      Encendido
+//Semaforo#2 Seguir
+digitalWrite (Color[7],HIGH);//Semaforo#2 Seguir   Verde     Encendido
+digitalWrite (Color[8],LOW);//Semaforo#2 Seguir   Rojo      Encendido
+//Semaforo#2 Doblar
+digitalWrite (Color[9],LOW);//Semaforo#2 Doblar   Verde     Encendido
+digitalWrite (Color[11],HIGH);//Semaforo#2 Doblar   Rojo      Encendido
+//Semaforo#3 Seguir
+digitalWrite (Color[12],LOW);//Semaforo#3 Seguir  Verde     Encendido
+digitalWrite (Color[14],HIGH);//Semaforo#3 Seguir  Rojo      Encendido
+//Semaforo#3 Doblar
+digitalWrite (Color[15],LOW);//Semaforo#3 Doblar  Verde     Encendido
+digitalWrite (Color[17],HIGH);//Semaforo#3 Doblar  Rojo      Encendido
+//Semaforo#4 Seguir
+digitalWrite (Color[19],HIGH);//Semaforo#4 Seguir  Verde     Encendido
+digitalWrite (Color[20],LOW);//Semaforo#4 Seguir  Rojo      Encendido
+//Semaforo#4 Doblar
+digitalWrite (Color[21],LOW);//Semaforo#4 Doblar  Verde     Encendido
+digitalWrite (Color[23],HIGH);//Semaforo#4 Doblar  Rojo      Encendido 
+  }
+
+ if (':' == mens){
+
+//Semaforo#1 seguir
+digitalWrite (Color[0],LOW);//Semaforo#1 Seguir Verde      Encendido
+digitalWrite (Color[2],HIGH);//Semaforo#1 Seguir Rojo       Encendido
+//Semaforo#1 Doblar
+digitalWrite (Color[3],LOW);//Semaforo#1 Doblar   Verde     Encendido
+digitalWrite (Color[5],HIGH);//Semaforo#1 Doblar   Rojo      Encendido
+//Semaforo#2 Seguir
+digitalWrite (Color[6],LOW);//Semaforo#2 Seguir   Verde     Encendido
+digitalWrite (Color[8],HIGH);//Semaforo#2 Seguir   Rojo      Encendido
+//Semaforo#2 Doblar
+digitalWrite (Color[10],HIGH);//Semaforo#2 Doblar   Verde     Encendido
+digitalWrite (Color[11],LOW);//Semaforo#2 Doblar   Rojo      Encendido
+//Semaforo#3 Seguir
+digitalWrite (Color[12],LOW);//Semaforo#3 Seguir  Verde     Encendido
+digitalWrite (Color[14],HIGH);//Semaforo#3 Seguir  Rojo      Encendido
+//Semaforo#3 Doblar
+digitalWrite (Color[15],LOW);//Semaforo#3 Doblar  Verde     Encendido
+digitalWrite (Color[17],HIGH);//Semaforo#3 Doblar  Rojo      Encendido
+//Semaforo#4 Seguir
+digitalWrite (Color[18],LOW);//Semaforo#4 Seguir  Verde     Encendido
+digitalWrite (Color[20],HIGH);//Semaforo#4 Seguir  Rojo      Encendido
+//Semaforo#4 Doblar
+digitalWrite (Color[22],HIGH);//Semaforo#4 Doblar  Verde     Encendido
+digitalWrite (Color[23],LOW);//Semaforo#4 Doblar  Rojo      Encendido
+
+ }
+
+
+    
+    }
+  if (Serial.available()>0) // if data is available on hardwareserial port ==> data is comming from PC or notebook
+    Serial1.write(Serial.read());  // write it to the GPRS shield
+
+
+
+//--------------------------------------------------------------Semaforos normal-----------------------------------------------------------------------------
+
+
+
+if(esto==LOW){
+
+
+// Secuencia para semaforo 1
+  digitalWrite(verde_semaforo1,HIGH);
+  digitalWrite(amarillo_semaforo1,LOW);
+  digitalWrite(rojo_semaforo1,LOW);
+  delay(RETARDO_VERDE);
+  digitalWrite(verde_semaforo1,LOW);
+  delay(RETARDO_PARPADEO_VERDE);
+  digitalWrite(verde_semaforo1,HIGH);
+  delay(RETARDO_PARPADEO_VERDE);
+  digitalWrite(verde_semaforo1,LOW);
+  delay(RETARDO_PARPADEO_VERDE);
+  digitalWrite(verde_semaforo1,HIGH);
+  delay(RETARDO_PARPADEO_VERDE);
+  digitalWrite(verde_semaforo1,LOW);
+  delay(RETARDO_PARPADEO_VERDE);
+  digitalWrite(verde_semaforo1,HIGH);
+  delay(RETARDO_PARPADEO_VERDE);
+  digitalWrite(verde_semaforo1,LOW);
+  digitalWrite(amarillo_semaforo1,HIGH);
+  delay(RETARDO_AMARILLO);
+  digitalWrite(amarillo_semaforo1,LOW);
+  digitalWrite(rojo_semaforo1,HIGH);
+ 
+  // Secuencia semaforo 2
+  digitalWrite(verde_semaforo2,HIGH);
+  digitalWrite(amarillo_semaforo2,LOW);
+  digitalWrite(rojo_semaforo2,LOW);
+  delay(RETARDO_VERDE);
+  digitalWrite(verde_semaforo2,LOW);
+  delay(RETARDO_PARPADEO_VERDE);
+  digitalWrite(verde_semaforo2,HIGH);
+  delay(RETARDO_PARPADEO_VERDE);
+  digitalWrite(verde_semaforo2,LOW);
+  delay(RETARDO_PARPADEO_VERDE);
+  digitalWrite(verde_semaforo2,HIGH);
+  delay(RETARDO_PARPADEO_VERDE);
+  digitalWrite(verde_semaforo2,LOW);
+  delay(RETARDO_PARPADEO_VERDE);
+  digitalWrite(verde_semaforo2,HIGH);
+  delay(RETARDO_PARPADEO_VERDE);
+  digitalWrite(verde_semaforo2,LOW);
+  digitalWrite(amarillo_semaforo2,HIGH);
+  delay(RETARDO_AMARILLO);
+  digitalWrite(amarillo_semaforo2,LOW);
+  digitalWrite(rojo_semaforo2,HIGH);
+ 
+   
+  // Secuencia semaforo 3
+  digitalWrite(verde_semaforo3,HIGH);
+  digitalWrite(amarillo_semaforo3,LOW);
+  digitalWrite(rojo_semaforo3,LOW);
+  delay(RETARDO_VERDE);
+  digitalWrite(verde_semaforo3,LOW);
+  delay(RETARDO_PARPADEO_VERDE);
+  digitalWrite(verde_semaforo3,HIGH);
+  delay(RETARDO_PARPADEO_VERDE);
+  digitalWrite(verde_semaforo3,LOW);
+  delay(RETARDO_PARPADEO_VERDE);
+  digitalWrite(verde_semaforo3,HIGH);
+  delay(RETARDO_PARPADEO_VERDE);
+  digitalWrite(verde_semaforo3,LOW);
+  delay(RETARDO_PARPADEO_VERDE);
+  digitalWrite(verde_semaforo3,HIGH);
+  delay(RETARDO_PARPADEO_VERDE);
+  digitalWrite(verde_semaforo3,LOW);
+  digitalWrite(amarillo_semaforo3,HIGH);
+  delay(RETARDO_AMARILLO);
+  digitalWrite(amarillo_semaforo3,LOW);
+  digitalWrite(rojo_semaforo3,HIGH);
+ 
+   
+  // Secuencia semaforo 4
+  digitalWrite(verde_semaforo4,HIGH);
+  digitalWrite(amarillo_semaforo4,LOW);
+  digitalWrite(rojo_semaforo4,LOW);
+  delay(RETARDO_VERDE);
+  digitalWrite(verde_semaforo4,LOW);
+  delay(RETARDO_PARPADEO_VERDE);
+  digitalWrite(verde_semaforo4,HIGH);
+  delay(RETARDO_PARPADEO_VERDE);
+  digitalWrite(verde_semaforo4,LOW);
+  delay(RETARDO_PARPADEO_VERDE);
+  digitalWrite(verde_semaforo4,HIGH);
+  delay(RETARDO_PARPADEO_VERDE);
+  digitalWrite(verde_semaforo4,LOW);
+  delay(RETARDO_PARPADEO_VERDE);
+  digitalWrite(verde_semaforo4,HIGH);
+  delay(RETARDO_PARPADEO_VERDE);
+  digitalWrite(verde_semaforo4,LOW);
+  digitalWrite(amarillo_semaforo4,HIGH);
+  delay(RETARDO_AMARILLO);
+  digitalWrite(amarillo_semaforo4,LOW);
+  digitalWrite(rojo_semaforo4,HIGH);
+
+
+}
+
+
+
+    
+}
